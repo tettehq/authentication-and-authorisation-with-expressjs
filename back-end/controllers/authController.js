@@ -167,10 +167,42 @@ const update_user_profile = async (req, res) => {
     }
 }
 
+const delete_user_by_username = async (req, res) => {
+    try {
+        let user_id = await get_user_id(req) // Get user id from JWT token by the helper function
+
+        if (!user_id) {
+            return res.status(400).json({ message: "Invalid Request", ok: false, })
+        }
+
+        let username = await req.body.username;
+        console.log(username);
+
+        let user = await UserModel.findOne({ where: { username: username } });
+
+        if (!user) {
+            return res.status(400).json({ message: "User not found", ok: false, })
+        }
+
+        await UserModel.destroy({
+            where: {
+                username: username
+            }
+        })
+
+        return res.status(200).json({ message: "User Deleted", ok: true, });
+
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: "Server Error", ok: false, });
+    }
+}
+
 module.exports = {
     login,
     logout,
     register,
     load_user_profile,
-    update_user_profile
+    update_user_profile,
+    delete_user_by_username
 }
